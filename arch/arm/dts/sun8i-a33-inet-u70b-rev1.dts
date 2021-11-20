@@ -10,6 +10,8 @@
 	compatible = "inet-tek,inet-u70b-rev01", "allwinner,sun8i-a33";
 
 	aliases {
+		/* XXX */
+		serial0 = &uart0;
 		ethernet0 = &rtl8723bs;
 	};
 
@@ -60,6 +62,11 @@
 	};
 };
 
+/* XXX */
+&mmc0 {
+	status = "disabled";
+};
+
 &mmc1 {
 	pinctrl-0 = <&mmc1_pg_pins>;
 	pinctrl-names = "default";
@@ -77,6 +84,11 @@
 
 &nfc {
 	status = "okay";
+};
+
+/* XXX */
+&r_uart {
+	status = "disabled";
 };
 
 &simplefb_lcd {
@@ -122,6 +134,13 @@
 	avdd-supply = <&reg_ldo_io1>;
 	touchscreen-size-x = <1024>;
 	touchscreen-size-y = <600>;
+	status = "okay";
+};
+
+/* XXX */
+&uart0 {
+	pinctrl-0 = <&uart0_pf_pins>;
+	pinctrl-names = "default";
 	status = "okay";
 };
 
