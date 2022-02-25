@@ -3,7 +3,7 @@
 VERSION = 2022
 PATCHLEVEL = 04
 SUBLEVEL =
-EXTRAVERSION = -rc1
+EXTRAVERSION = -rc2
 NAME =
 
 # *DOCUMENTATION*
@@ -1344,6 +1344,7 @@ cmd_binman = $(srctree)/tools/binman/binman $(if $(BINMAN_DEBUG),-D) \
 		-I arch/$(ARCH)/dts -a of-list=$(CONFIG_OF_LIST) \
 		$(foreach f,$(BINMAN_INDIRS),-I $(f)) \
 		-a atf-bl31-path=${BL31} \
+		-a tee-os-path=${TEE} \
 		-a opensbi-path=${OPENSBI} \
 		-a default-dt=$(default_dt) \
 		-a scp-path=$(SCP) \
@@ -1860,7 +1861,7 @@ quiet_cmd_gen_envp = ENVP    $@
 			-I$(srctree)/arch/$(ARCH)/include \
 			$< -o $@; \
 	else \
-		echo -n >$@ ; \
+		touch $@ ; \
 	fi
 include/generated/env.in: include/generated/env.txt FORCE
 	$(call cmd,gen_envp)
@@ -1877,7 +1878,7 @@ quiet_cmd_envc = ENVC    $@
 	elif [ -n "$(ENV_SOURCE_FILE)" ]; then \
 		echo "Missing file $(ENV_FILE_CFG)"; \
 	else \
-		echo -n >$@ ; \
+		touch $@ ; \
 	fi
 
 include/generated/env.txt: $(wildcard $(ENV_FILE)) FORCE
