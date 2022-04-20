@@ -79,13 +79,13 @@ config BOARD_SPECIFIC_OPTIONS
 	select DM_SPI if SPI
 	select GPIO
 	select MMC_SUNXI_HAS_NEW_MODE if MMC_SUNXI
-	select OF_HAS_PRIOR_STAGE
 	select PHY_SUN4I_USB if USB
 	select PINCTRL
 	select SPL_CLK if SPL_DM
 	select SPL_GPIO if SPL_DM
 	select SPL_OF_CONTROL if SPL_DM
 	select SPL_PINCTRL if SPL_DM
+	select SPL_PINCONF if SPL_DM
 	select SPL_SEPARATE_BSS if SPL
 	select SUPPORT_SPL
 	imply CMD_MMC
@@ -94,7 +94,8 @@ config BOARD_SPECIFIC_OPTIONS
 	imply FIT
 	imply MMC
 	imply SPL
-	imply SPL_SPI if SPI
+	imply SPL_DM_SPI if SPI && SPL_DM
+	imply SPL_DM_SPI_FLASH if SPL_DM_SPI
 	imply SPL_MMC if MMC
 	imply SUNXI_GPIO
 	imply SYS_I2C_MVTWSI

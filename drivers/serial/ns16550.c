@@ -553,6 +553,7 @@ int ns16550_serial_of_to_plat(struct udevice *dev)
 
 	err = clk_get_by_index(dev, 0, &clk);
 	if (!err) {
+		clk_enable(&clk);
 		err = clk_get_rate(&clk);
 		if (!IS_ERR_VALUE(err))
 			plat->clock = err;

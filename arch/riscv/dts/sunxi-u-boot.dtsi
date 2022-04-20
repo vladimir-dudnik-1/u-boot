@@ -2,6 +2,56 @@
 
 #include "binman.dtsi"
 
-&mbus {
+/ {
+	cpus {
+		u-boot,dm-spl;
+	};
+
+	soc {
+		u-boot,dm-spl;
+	};
+};
+
+&ccu {
+	u-boot,dm-spl;
+};
+
+&clint {
 	status = "disabled";
+};
+
+&cpu0 {
+	u-boot,dm-spl;
+};
+
+&gpio {
+	u-boot,dm-spl;
+};
+
+&mbus {
+	u-boot,dm-spl;
+};
+
+&mmc0 {
+	u-boot,dm-spl;
+};
+
+&mmc0_pins {
+	u-boot,dm-spl;
+};
+
+&osc24M {
+	u-boot,dm-spl;
+};
+
+&rtc {
+	u-boot,dm-spl;
+};
+
+&uart0 {
+	u-boot,dm-spl;
+};
+
+&uart0_pb8_pins {
+	u-boot,dm-spl;
 };

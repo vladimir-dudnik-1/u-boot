@@ -17,19 +17,19 @@
 	#address-cells = <1>;
 	#size-cells = <1>;
 
-	// FIXME: no riscv architecture support for cpufreq
 	cpu_opp_table: cpu-opp-table {
-		compatible = "allwinner,sun20i-d1-operating-points",
-			     "allwinner,sun50i-h6-operating-points";
-		nvmem-cells = <&cpu_speed_grade>;
+		compatible = "operating-points-v2";
+
+		opp-408000000 {
+			clock-latency-ns = <244144>; /* 8 32k periods */
+			opp-hz = /bits/ 64 <408000000>;
+			opp-microvolt = <1100000>;
+		};
 
 		opp-1080000000 {
-			// FIXME: this is probably wrong now.
 			clock-latency-ns = <244144>; /* 8 32k periods */
 			opp-hz = /bits/ 64 <1008000000>;
-
-			// FIXME: derive a real voltage range.
-			opp-microvolt-speed0 = <1100000>;
+			opp-microvolt = <1100000>;
 		};
 	};
 
@@ -46,6 +46,7 @@
 			clocks = <&ccu CLK_RISCV>;
 			clock-frequency = <24000000>;
 			#cooling-cells = <2>;
+			cpu-idle-states = <&cpu_nonretentive>;
 			d-cache-block-size = <64>;
 			d-cache-sets = <256>;
 			d-cache-size = <32768>;
@@ -61,6 +62,26 @@
 				#address-cells = <0>;
 				interrupt-controller;
 				#interrupt-cells = <1>;
+			};
+		};
+
+		idle-states {
+			cpu_retentive: cpu-retentive {
+				compatible = "riscv,idle-state";
+				riscv,sbi-suspend-param = <0x00000000>;
+				entry-latency-us = <100>;
+				exit-latency-us = <100>;
+				min-residency-us = <1000>;
+				local-timer-stop;
+			};
+
+			cpu_nonretentive: cpu-nonretentive {
+				compatible = "riscv,idle-state";
+				riscv,sbi-suspend-param = <0x80000000>;
+				entry-latency-us = <1000>;
+				exit-latency-us = <1000>;
+				min-residency-us = <10000>;
+				local-timer-stop;
 			};
 		};
 	};

@@ -34,15 +34,17 @@
 
 unsigned int clock_get_pll6(void)
 {
-	struct sunxi_ccm_reg *const ccm =
-		(struct sunxi_ccm_reg *)0x2001000UL;
+	uint32_t rval = readl((void *)0x2001020);
 
-	uint32_t rval = readl(&ccm->pll6_cfg);
 	int n = ((rval & CCM_PLL6_CTRL_N_MASK) >> CCM_PLL6_CTRL_N_SHIFT) + 1;
 	int m = ((rval >> 1) & 0x1) + 1;
 	int p0 = ((rval >> 16) & 0x7) + 1;
 	/* The register defines PLL6-2X, not plain PLL6 */
-	return 24000000 / n / m / p0;
+	uint32_t freq = 24000000UL * n / m / p0;
+
+	printf("PLL reg = 0x%08x, freq = %d\n", rval, freq);
+
+	return freq;
 }
 
 struct sunxi_mmc_plat {
@@ -666,7 +668,8 @@ static unsigned get_mclk_offset(void)
 	if (IS_ENABLED(CONFIG_MACH_SUN9I_A80))
 		return 0x410;
 
-	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6))
+	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6) ||
+	    IS_ENABLED(CONFIG_MACH_SUN20I))
 		return 0x830;
 
 	return 0x88;
