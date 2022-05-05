@@ -26,7 +26,7 @@
 
 #include <linux/types.h>
 
-#ifdef CONFIG_DM_SERIAL
+#if CONFIG_IS_ENABLED(DM_SERIAL)
 /*
  * For driver model we always use one byte per register, and sort out the
  * differences in the driver
