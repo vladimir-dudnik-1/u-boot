@@ -7,6 +7,7 @@
 #ifndef _CLK_SUNXI_H
 #define _CLK_SUNXI_H
 
+#include <dt-structs.h>
 #include <linux/bitops.h>
 
 /**
@@ -76,6 +77,9 @@ struct ccu_desc {
  * @desc:	ccu descriptor
  */
 struct ccu_plat {
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	struct dtd_sunxi_clk dtd;
+#endif
 	void *base;
 	const struct ccu_desc *desc;
 };

@@ -134,7 +134,11 @@
 #define LOW_LEVEL_SRAM_STACK		0x00118000
 #endif
 #else
+#ifdef CONFIG_SUNXI_GEN_SUN6I
+#define CONFIG_SPL_MAX_SIZE		0x7fa0		/* 32 KiB */
+#else
 #define CONFIG_SPL_MAX_SIZE		0x5fa0		/* 24KB on sun4i/sun7i */
+#endif
 #define LOW_LEVEL_SRAM_STACK		0x00008000	/* End of sram */
 #endif
 

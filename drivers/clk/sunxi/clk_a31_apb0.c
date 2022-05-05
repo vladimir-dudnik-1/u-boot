@@ -41,6 +41,9 @@ static int sun6i_apb0_of_to_plat(struct udevice *dev)
 {
 	struct ccu_plat *plat = dev_get_plat(dev);
 
+	if (!CONFIG_IS_ENABLED(OF_REAL))
+		return 0;
+
 	plat->base = dev_read_addr_ptr(dev->parent);
 	if (!plat->base)
 		return -ENOMEM;

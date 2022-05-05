@@ -895,3 +895,5 @@ U_BOOT_DRIVER(sunxi_pinctrl) = {
 	.plat_auto	= sizeof(struct sunxi_pinctrl_plat),
 	.ops		= &sunxi_pinctrl_ops,
 };
+
+DM_DRIVER_ALIAS(sunxi_pinctrl, allwinner_sun8i_a33_pinctrl)

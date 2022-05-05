@@ -80,6 +80,12 @@ static int sunxi_clk_probe(struct udevice *dev)
 	struct reset_ctl_bulk rst_bulk;
 	int ret;
 
+#if CONFIG_IS_ENABLED(OF_PLATDATA)
+	struct ccu_plat *plat = dev_get_plat(dev);
+
+	plat->base = (void *)plat->dtd.reg[0];
+#endif
+
 	ret = clk_get_bulk(dev, &clk_bulk);
 	if (!ret)
 		clk_enable_bulk(&clk_bulk);
@@ -94,6 +100,9 @@ static int sunxi_clk_probe(struct udevice *dev)
 static int sunxi_clk_of_to_plat(struct udevice *dev)
 {
 	struct ccu_plat *plat = dev_get_plat(dev);
+
+	if (!CONFIG_IS_ENABLED(OF_REAL))
+		return 0;
 
 	plat->base = dev_read_addr_ptr(dev);
 	if (!plat->base)
@@ -225,3 +234,5 @@ U_BOOT_DRIVER(sunxi_clk) = {
 	.plat_auto	= sizeof(struct ccu_plat),
 	.ops		= &sunxi_clk_ops,
 };
+
+DM_DRIVER_ALIAS(sunxi_clk, allwinner_sun8i_a33_ccu)

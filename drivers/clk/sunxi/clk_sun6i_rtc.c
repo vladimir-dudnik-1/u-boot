@@ -35,3 +35,5 @@ U_BOOT_DRIVER(clk_sun6i_rtc) = {
 	.of_match	= sun6i_rtc_ids,
 	.ops		= &clk_sun6i_rtc_ops,
 };
+
+DM_DRIVER_ALIAS(clk_sun6i_rtc, allwinner_sun8i_a23_rtc)

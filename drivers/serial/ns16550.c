@@ -625,6 +625,7 @@ U_BOOT_DRIVER(ns16550_serial) = {
 };
 
 DM_DRIVER_ALIAS(ns16550_serial, ti_da830_uart)
+DM_DRIVER_ALIAS(ns16550_serial, snps_dw_apb_uart)
 #endif
 #endif /* SERIAL_PRESENT */
 

@@ -1,0 +1,35 @@
+#include "sunxi-u-boot.dtsi"
+
+/ {
+	soc {
+		u-boot,dm-spl;
+	};
+};
+
+&ccu {
+	u-boot,dm-spl;
+};
+
+&ext_osc32k {
+	u-boot,dm-spl;
+};
+
+&osc24M {
+	u-boot,dm-spl;
+};
+
+&pio {
+	u-boot,dm-spl;
+};
+
+&rtc {
+	u-boot,dm-spl;
+};
+
+&uart0 {
+	u-boot,dm-spl;
+};
+
+&uart0_pf_pins {
+	u-boot,dm-spl;
+};
