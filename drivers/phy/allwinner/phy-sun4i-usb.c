@@ -204,6 +204,9 @@ static int sun4i_usb_phy_power_on(struct phy *phy)
 			return ret;
 	}
 
+	if (dm_gpio_is_valid(&usb_phy->gpio_vbus))
+		dm_gpio_set_value(&usb_phy->gpio_vbus, 1);
+
 	return 0;
 }
 
