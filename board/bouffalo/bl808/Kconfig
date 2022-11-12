@@ -17,6 +17,7 @@ config TEXT_BASE
 
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
+	select BOARD_EARLY_INIT_F
 	select DM_GPIO if GPIO
 	select GENERIC_RISCV
 	imply BFLB_SERIAL
