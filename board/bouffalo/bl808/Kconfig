@@ -1,0 +1,25 @@
+if TARGET_BOUFFALO_BL808
+
+config SYS_BOARD
+	default "bl808"
+
+config SYS_CONFIG_NAME
+	default "bl808"
+
+config SYS_CPU
+	default "generic"
+
+config SYS_VENDOR
+	default "bouffalo"
+
+config TEXT_BASE
+	default 0x22020000
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	select DM_GPIO if GPIO
+	select GENERIC_RISCV
+	imply BFLB_SERIAL
+	imply RISCV_TIMER
+
+endif
