@@ -1,0 +1,3 @@
+&uart0_pins {
+	u-boot,dm-spl;
+};
