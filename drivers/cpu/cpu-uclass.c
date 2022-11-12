@@ -108,6 +108,7 @@ int cpu_get_vendor(const struct udevice *dev, char *buf, int size)
 U_BOOT_DRIVER(cpu_bus) = {
 	.name	= "cpu_bus",
 	.id	= UCLASS_SIMPLE_BUS,
+	.flags	= DM_FLAG_PRE_RELOC,
 };
 
 static int uclass_cpu_init(struct uclass *uc)
