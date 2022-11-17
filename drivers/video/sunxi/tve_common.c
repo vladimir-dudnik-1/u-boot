@@ -9,8 +9,9 @@
 
 #include <common.h>
 
-#include <asm/arch/tve.h>
 #include <asm/io.h>
+
+#include "tve.h"
 
 void tvencoder_mode_set(struct sunxi_tve_reg * const tve, enum tve_mode mode)
 {

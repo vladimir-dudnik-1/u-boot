@@ -14,9 +14,10 @@
 #include <edid.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
-#include <asm/arch/lcdc.h>
 #include <asm/global_data.h>
 #include <asm/gpio.h>
+
+#include "lcdc.h"
 
 struct sunxi_lcd_priv {
 	struct display_timing timing;

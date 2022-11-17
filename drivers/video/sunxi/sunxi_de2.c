@@ -18,9 +18,10 @@
 #include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
-#include <asm/arch/display2.h>
 #include <linux/bitops.h>
 #include "simplefb_common.h"
+
+#include "sunxi_de2.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 

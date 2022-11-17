@@ -16,10 +16,7 @@
 #include <linux/delay.h>
 
 #include <asm/arch/clock.h>
-#include <asm/arch/display.h>
-#include <asm/arch/lcdc.h>
 #include <asm/arch/pwm.h>
-#include <asm/arch/tve.h>
 #include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/io.h>
@@ -36,6 +33,10 @@
 #include "../hitachi_tx18d42vm_lcd.h"
 #include "../ssd2828.h"
 #include "simplefb_common.h"
+
+#include "lcdc.h"
+#include "sunxi_display.h"
+#include "tve.h"
 
 #ifdef CONFIG_VIDEO_LCD_BL_PWM_ACTIVE_LOW
 #define PWM_ON 0
