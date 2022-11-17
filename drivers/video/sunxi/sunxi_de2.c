@@ -289,17 +289,25 @@ static int sunxi_de2_bind(struct udevice *dev)
 static const struct video_ops sunxi_de2_ops = {
 };
 
+static const struct udevice_id sunxi_de2_ids[] = {
+	{ .compatible = "allwinner,sun8i-a83t-display-engine" },
+	{ .compatible = "allwinner,sun8i-h3-display-engine" },
+	{ .compatible = "allwinner,sun8i-r40-display-engine" },
+	{ .compatible = "allwinner,sun8i-v3s-display-engine" },
+	{ .compatible = "allwinner,sun20i-d1-display-engine" },
+	{ .compatible = "allwinner,sun50i-a64-display-engine" },
+	{ .compatible = "allwinner,sun50i-h6-display-engine" },
+	{ }
+};
+
 U_BOOT_DRIVER(sunxi_de2) = {
 	.name	= "sunxi_de2",
 	.id	= UCLASS_VIDEO,
+	.of_match = sunxi_de2_ids,
 	.ops	= &sunxi_de2_ops,
 	.bind	= sunxi_de2_bind,
 	.probe	= sunxi_de2_probe,
 	.flags	= DM_FLAG_PRE_RELOC,
-};
-
-U_BOOT_DRVINFO(sunxi_de2) = {
-	.name = "sunxi_de2"
 };
 
 /*

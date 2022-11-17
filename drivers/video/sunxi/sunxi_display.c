@@ -1254,18 +1254,28 @@ static int sunxi_de_bind(struct udevice *dev)
 static const struct video_ops sunxi_de_ops = {
 };
 
+static const struct udevice_id sunxi_de_ids[] = {
+	{ .compatible = "allwinner,sun4i-a10-display-engine" },
+	{ .compatible = "allwinner,sun5i-a10s-display-engine" },
+	{ .compatible = "allwinner,sun5i-a13-display-engine" },
+	{ .compatible = "allwinner,sun6i-a31-display-engine" },
+	{ .compatible = "allwinner,sun6i-a31s-display-engine" },
+	{ .compatible = "allwinner,sun7i-a20-display-engine" },
+	{ .compatible = "allwinner,sun8i-a23-display-engine" },
+	{ .compatible = "allwinner,sun8i-a33-display-engine" },
+	{ .compatible = "allwinner,sun9i-a80-display-engine" },
+	{ }
+};
+
 U_BOOT_DRIVER(sunxi_de) = {
 	.name	= "sunxi_de",
 	.id	= UCLASS_VIDEO,
+	.of_match = sunxi_de_ids,
 	.ops	= &sunxi_de_ops,
 	.bind	= sunxi_de_bind,
 	.probe	= sunxi_de_probe,
 	.priv_auto = sizeof(struct sunxi_display_priv),
 	.flags	= DM_FLAG_PRE_RELOC,
-};
-
-U_BOOT_DRVINFO(sunxi_de) = {
-	.name = "sunxi_de"
 };
 
 /*
