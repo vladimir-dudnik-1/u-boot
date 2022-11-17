@@ -119,6 +119,7 @@ extern const struct ccu_desc a80_ccu_desc;
 extern const struct ccu_desc a80_mmc_clk_desc;
 extern const struct ccu_desc a83t_ccu_desc;
 extern const struct ccu_desc d1_ccu_desc;
+extern const struct ccu_desc de2_ccu_desc;
 extern const struct ccu_desc f1c100s_ccu_desc;
 extern const struct ccu_desc h3_ccu_desc;
 extern const struct ccu_desc h6_ccu_desc;
@@ -156,6 +157,10 @@ static const struct udevice_id sunxi_clk_ids[] = {
 	{ .compatible = "allwinner,sun8i-a83t-ccu",
 	  .data = (ulong)&a83t_ccu_desc },
 #endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun8i-a83t-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
+#endif
 #ifdef CONFIG_CLK_SUN6I_A31_R
 	{ .compatible = "allwinner,sun8i-a83t-r-ccu",
 	  .data = (ulong)&a31_r_ccu_desc },
@@ -163,6 +168,10 @@ static const struct udevice_id sunxi_clk_ids[] = {
 #ifdef CONFIG_CLK_SUN8I_H3
 	{ .compatible = "allwinner,sun8i-h3-ccu",
 	  .data = (ulong)&h3_ccu_desc },
+#endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun8i-h3-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
 #endif
 #ifdef CONFIG_CLK_SUN6I_A31_R
 	{ .compatible = "allwinner,sun8i-h3-r-ccu",
@@ -172,11 +181,19 @@ static const struct udevice_id sunxi_clk_ids[] = {
 	{ .compatible = "allwinner,sun8i-r40-ccu",
 	  .data = (ulong)&r40_ccu_desc },
 #endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun8i-r40-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
+#endif
 #ifdef CONFIG_CLK_SUN8I_V3S
 	{ .compatible = "allwinner,sun8i-v3-ccu",
 	  .data = (ulong)&v3s_ccu_desc },
 	{ .compatible = "allwinner,sun8i-v3s-ccu",
 	  .data = (ulong)&v3s_ccu_desc },
+#endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun8i-v3s-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
 #endif
 #ifdef CONFIG_CLK_SUN9I_A80
 	{ .compatible = "allwinner,sun9i-a80-ccu",
@@ -192,6 +209,10 @@ static const struct udevice_id sunxi_clk_ids[] = {
 	{ .compatible = "allwinner,sun50i-a64-ccu",
 	  .data = (ulong)&a64_ccu_desc },
 #endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun50i-a64-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
+#endif
 #ifdef CONFIG_CLK_SUN6I_A31_R
 	{ .compatible = "allwinner,sun50i-a64-r-ccu",
 	  .data = (ulong)&a31_r_ccu_desc },
@@ -200,9 +221,17 @@ static const struct udevice_id sunxi_clk_ids[] = {
 	{ .compatible = "allwinner,sun50i-h5-ccu",
 	  .data = (ulong)&h3_ccu_desc },
 #endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun50i-h5-de2-clk",
+	  .data = (ulong)&de2_ccu_desc },
+#endif
 #ifdef CONFIG_CLK_SUN50I_H6
 	{ .compatible = "allwinner,sun50i-h6-ccu",
 	  .data = (ulong)&h6_ccu_desc },
+#endif
+#ifdef CONFIG_CLK_SUN8I_DE2
+	{ .compatible = "allwinner,sun50i-h6-de3-clk",
+	  .data = (ulong)&de2_ccu_desc },
 #endif
 #ifdef CONFIG_CLK_SUN50I_H6_R
 	{ .compatible = "allwinner,sun50i-h6-r-ccu",
