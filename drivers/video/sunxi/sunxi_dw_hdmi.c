@@ -16,6 +16,7 @@
 #include <asm/arch/clock.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
+#include <power/regulator.h>
 
 #include "lcdc.h"
 
@@ -328,7 +329,12 @@ static int sunxi_dw_hdmi_probe(struct udevice *dev)
 	struct sunxi_dw_hdmi_priv *priv = dev_get_priv(dev);
 	struct sunxi_ccm_reg * const ccm =
 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+	struct udevice *hvcc;
 	int ret;
+
+	ret = device_get_supply_regulator(dev, "hvcc-supply", &hvcc);
+	if (!ret)
+		regulator_set_enable(hvcc, true);
 
 	/* Set pll3 to 297 MHz */
 	clock_set_pll3(297000000);
