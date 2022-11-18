@@ -169,9 +169,7 @@ struct emac_eth_dev {
 	struct clk ephy_clk;
 	struct reset_ctl tx_rst;
 	struct reset_ctl ephy_rst;
-#if CONFIG_IS_ENABLED(DM_GPIO)
 	struct gpio_desc reset_gpio;
-#endif
 };
 
 
@@ -633,7 +631,6 @@ err_tx_clk:
 	return ret;
 }
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
 static int sun8i_mdio_reset(struct mii_dev *bus)
 {
 	struct udevice *dev = bus->priv;
@@ -665,7 +662,6 @@ static int sun8i_mdio_reset(struct mii_dev *bus)
 
 	return 0;
 }
-#endif
 
 static int sun8i_mdio_init(const char *name, struct udevice *priv)
 {
@@ -680,9 +676,7 @@ static int sun8i_mdio_init(const char *name, struct udevice *priv)
 	bus->write = sun8i_mdio_write;
 	snprintf(bus->name, sizeof(bus->name), name);
 	bus->priv = (void *)priv;
-#if CONFIG_IS_ENABLED(DM_GPIO)
 	bus->reset = sun8i_mdio_reset;
-#endif
 
 	return  mdio_register(bus);
 }
@@ -795,9 +789,7 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 	const fdt32_t *reg;
 	int node = dev_of_offset(dev);
 	int offset = 0;
-#if CONFIG_IS_ENABLED(DM_GPIO)
 	int reset_flags = GPIOD_IS_OUT;
-#endif
 	int ret;
 
 	pdata->iobase = dev_read_addr(dev);
@@ -880,7 +872,6 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 		printf("%s: Invalid RX delay value %d\n", __func__,
 		       sun8i_pdata->rx_delay_ps);
 
-#if CONFIG_IS_ENABLED(DM_GPIO)
 	if (fdtdec_get_bool(gd->fdt_blob, dev_of_offset(dev),
 			    "snps,reset-active-low"))
 		reset_flags |= GPIOD_ACTIVE_LOW;
@@ -895,7 +886,6 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 	} else if (ret == -ENOENT) {
 		ret = 0;
 	}
-#endif
 
 	return 0;
 }
