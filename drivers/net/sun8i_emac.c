@@ -24,6 +24,7 @@
 #include <linux/bitops.h>
 #include <linux/delay.h>
 #include <linux/err.h>
+#include <power/regulator.h>
 #include <malloc.h>
 #include <miiphy.h>
 #include <net.h>
@@ -170,6 +171,7 @@ struct emac_eth_dev {
 	struct reset_ctl tx_rst;
 	struct reset_ctl ephy_rst;
 	struct gpio_desc reset_gpio;
+	struct udevice *phy_supply;
 };
 
 
@@ -593,6 +595,9 @@ static int sun8i_emac_board_setup(struct udevice *dev,
 {
 	int ret;
 
+	if (priv->phy_supply)
+		regulator_set_enable(priv->phy_supply, true);
+
 	ret = clk_enable(&priv->tx_clk);
 	if (ret) {
 		dev_err(dev, "failed to enable TX clock\n");
@@ -886,6 +891,8 @@ static int sun8i_emac_eth_of_to_plat(struct udevice *dev)
 	} else if (ret == -ENOENT) {
 		ret = 0;
 	}
+
+	device_get_supply_regulator(dev, "phy-supply", &priv->phy_supply);
 
 	return 0;
 }
