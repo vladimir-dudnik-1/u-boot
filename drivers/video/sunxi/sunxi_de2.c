@@ -37,15 +37,6 @@ static void sunxi_de2_composer_init(void)
 	struct sunxi_ccm_reg * const ccm =
 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
 
-#ifdef CONFIG_MACH_SUN50I
-	u32 reg_value;
-
-	/* set SRAM for video use (A64 only) */
-	reg_value = readl(SUNXI_SRAMC_BASE + 0x04);
-	reg_value &= ~(0x01 << 24);
-	writel(reg_value, SUNXI_SRAMC_BASE + 0x04);
-#endif
-
 	clock_set_pll10(432000000);
 
 	/* Set DE parent to pll10 */
@@ -308,6 +299,28 @@ U_BOOT_DRIVER(sunxi_de2) = {
 	.bind	= sunxi_de2_bind,
 	.probe	= sunxi_de2_probe,
 	.flags	= DM_FLAG_PRE_RELOC,
+};
+
+static int sun50i_de2_bus_bind(struct udevice *dev)
+{
+#ifdef CONFIG_MACH_SUN50I
+	/* set SRAM for video use (A64 only) */
+	clrbits_le32(SUNXI_SRAMC_BASE + 0x04, BIT(24));
+#endif
+
+	return 0;
+}
+
+static const struct udevice_id sun50i_de2_bus_ids[] = {
+	{ .compatible = "allwinner,sun50i-a64-de2" },
+	{ }
+};
+
+U_BOOT_DRIVER(sun50i_de2_bus) = {
+	.name		= "sun50i_de2_bus",
+	.id		= UCLASS_SIMPLE_BUS,
+	.of_match	= sun50i_de2_bus_ids,
+	.bind		= sun50i_de2_bus_bind,
 };
 
 /*
