@@ -14,9 +14,11 @@
 #include <time.h>
 #include <asm/io.h>
 #include <asm/arch/clock.h>
-#include <asm/arch/lcdc.h>
 #include <linux/bitops.h>
 #include <linux/delay.h>
+#include <power/regulator.h>
+
+#include "lcdc.h"
 
 struct sunxi_dw_hdmi_priv {
 	struct dw_hdmi hdmi;
@@ -327,7 +329,12 @@ static int sunxi_dw_hdmi_probe(struct udevice *dev)
 	struct sunxi_dw_hdmi_priv *priv = dev_get_priv(dev);
 	struct sunxi_ccm_reg * const ccm =
 		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+	struct udevice *hvcc;
 	int ret;
+
+	ret = device_get_supply_regulator(dev, "hvcc-supply", &hvcc);
+	if (!ret)
+		regulator_set_enable(hvcc, true);
 
 	/* Set pll3 to 297 MHz */
 	clock_set_pll3(297000000);
@@ -370,14 +377,17 @@ static const struct dm_display_ops sunxi_dw_hdmi_ops = {
 	.mode_valid = sunxi_dw_hdmi_mode_valid,
 };
 
+static const struct udevice_id sunxi_dw_hdmi_ids[] = {
+	{ .compatible = "allwinner,sun8i-a83t-dw-hdmi" },
+	{ .compatible = "allwinner,sun50i-h6-dw-hdmi" },
+	{ }
+};
+
 U_BOOT_DRIVER(sunxi_dw_hdmi) = {
 	.name	= "sunxi_dw_hdmi",
 	.id	= UCLASS_DISPLAY,
+	.of_match	= sunxi_dw_hdmi_ids,
 	.ops	= &sunxi_dw_hdmi_ops,
 	.probe	= sunxi_dw_hdmi_probe,
 	.priv_auto	= sizeof(struct sunxi_dw_hdmi_priv),
-};
-
-U_BOOT_DRVINFO(sunxi_dw_hdmi) = {
-	.name = "sunxi_dw_hdmi"
 };

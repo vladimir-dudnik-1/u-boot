@@ -12,8 +12,9 @@
 #include <linux/delay.h>
 
 #include <asm/arch/clock.h>
-#include <asm/arch/lcdc.h>
 #include <asm/io.h>
+
+#include "lcdc.h"
 
 static int lcdc_get_clk_delay(const struct display_timing *mode, int tcon)
 {
