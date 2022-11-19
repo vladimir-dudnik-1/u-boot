@@ -60,7 +60,7 @@ static int axp_regulator_set_value(struct udevice *dev, int uV)
 
 	if (plat->volt_reg == NA)
 		return -EINVAL;
-	if (mv < plat->min_mV || mV > plat->max_mV)
+	if (mV < plat->min_mV || mV > plat->max_mV)
 		return -EINVAL;
 
 	shift = ffs(plat->volt_mask) - 1;
@@ -86,7 +86,7 @@ static int axp_regulator_get_enable(struct udevice *dev)
 
 	reg = pmic_reg_read(dev->parent, plat->enable_reg);
 	if (reg < 0)
-		return val;
+		return reg;
 
 	return (reg & plat->enable_mask) == plat->enable_mask;
 }
