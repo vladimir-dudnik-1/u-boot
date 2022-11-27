@@ -76,6 +76,7 @@ static bool sunxi_mmc_can_calibrate(void)
 	       IS_ENABLED(CONFIG_MACH_SUN50I_H5) ||
 	       IS_ENABLED(CONFIG_SUN50I_GEN_H6) ||
 	       IS_ENABLED(CONFIG_MACH_SUN8I_R40) ||
+	       IS_ENABLED(CONFIG_MACH_SUN8I_T113) ||
 	       IS_ENABLED(CONFIG_TARGET_SUN20I_D1);
 }
 
@@ -210,7 +211,7 @@ static int mmc_config_clock(struct sunxi_mmc_priv *priv, struct mmc *mmc)
 	rval &= ~SUNXI_MMC_CLK_DIVIDER_MASK;
 	writel(rval, &priv->reg->clkcr);
 
-#if defined(CONFIG_SUNXI_GEN_SUN6I) || defined(CONFIG_SUN50I_GEN_H6) || defined(CONFIG_TARGET_SUN20I_D1)
+#if defined(CONFIG_MACH_SUN8I_T113) || defined(CONFIG_SUNXI_GEN_SUN6I) || defined(CONFIG_SUN50I_GEN_H6) || defined(CONFIG_TARGET_SUN20I_D1)
 	/* A64 supports calibration of delays on MMC controller and we
 	 * have to set delay of zero before starting calibration.
 	 * Allwinner BSP driver sets a delay only in the case of
@@ -638,7 +639,8 @@ static unsigned get_mclk_offset(void)
 	if (IS_ENABLED(CONFIG_MACH_SUN9I_A80))
 		return 0x410;
 
-	if (IS_ENABLED(CONFIG_SUN50I_GEN_H6) ||
+	if (IS_ENABLED(CONFIG_MACH_SUN8I_T113) ||
+	    IS_ENABLED(CONFIG_SUN50I_GEN_H6) ||
 	    IS_ENABLED(CONFIG_TARGET_SUN20I_D1))
 		return 0x830;
 

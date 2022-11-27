@@ -12,6 +12,7 @@
 
 #include <dm.h>
 #include <cpu.h>
+#include <debug_uart.h>
 #include <env.h>
 #include <env_internal.h>
 #include <fdt_support.h>
@@ -26,16 +27,39 @@
 #include <status_led.h>
 #include <sunxi_image.h>
 #include <u-boot/crc.h>
+#ifdef CONFIG_RISCV
 #include <asm/csr.h>
+#else
+#include <asm/armv7.h>
+#endif
 #include <asm/global_data.h>
 #include <asm/io.h>
 
-#ifdef CONFIG_RISCV
+DECLARE_GLOBAL_DATA_PTR;
+
+#ifdef CONFIG_MACH_SUN8I_T113
 int board_init(void)
 {
+#ifdef CONFIG_RISCV
 	/* https://lore.kernel.org/u-boot/31587574-4cd1-02da-9761-0134ac82b94b@sholland.org/ */
 	return cpu_probe_all();
+#else
+	armv7_init_nonsec();
+	return 0;
+#endif
 }
+
+#ifdef CONFIG_MACH_SUN8I_T113
+int dram_init(void)
+{
+	return fdtdec_setup_mem_size_base();
+}
+
+int dram_init_banksize(void)
+{
+	return fdtdec_setup_memory_banksize();
+}
+#endif
 
 int sunxi_get_sid(unsigned int *sid)
 {
@@ -183,6 +207,48 @@ u32 spl_boot_device(void)
 #define CSR_MCOR		0x7c2
 #define CSR_MHINT		0x7c5
 
+#ifdef CONFIG_SPL_BUILD
+#define SUNXI_SPC_BASE			0x2000800
+#define SUNXI_CCU_BASE			0x2001000
+#define SUNXI_DMA_BASE			0x3002000
+#define SUNXI_R_PRCM_BASE		0x7010000
+
+#define SUNXI_SPC_NUM_PORTS		14
+
+#define SUNXI_SPC_DECPORT_STA_REG(p)	(SUNXI_SPC_BASE + 0x0000 + 0x10 * (p))
+#define SUNXI_SPC_DECPORT_SET_REG(p)	(SUNXI_SPC_BASE + 0x0004 + 0x10 * (p))
+#define SUNXI_SPC_DECPORT_CLR_REG(p)	(SUNXI_SPC_BASE + 0x0008 + 0x10 * (p))
+
+#define SUNXI_CCU_SEC_SWITCH_REG	(SUNXI_CCU_BASE + 0x0f00)
+
+#define SUNXI_R_PRCM_SEC_SWITCH_REG	(SUNXI_R_PRCM_BASE + 0x0290)
+
+#define DMA_SEC_REG			0x20
+
+/*
+ * Setup the peripherals to be accessible by non-secure world.
+ * This will not work for the Secure Peripherals Controller (SPC) unless
+ * a fuse it burnt (seems to be an erratum), but we do it nevertheless,
+ * to allow booting on boards using secure boot.
+ */
+void sunxi_security_setup(void)
+{
+	int i;
+
+	/* SPC setup: set all devices to non-secure */
+	for (i = 0; i < SUNXI_SPC_NUM_PORTS; i++)
+		writel(0xffffffff, SUNXI_SPC_DECPORT_SET_REG(i));
+
+	/* set MBUS clocks, bus clocks (AXI/AHB/APB) and PLLs to non-secure */
+	writel(0x7, SUNXI_CCU_SEC_SWITCH_REG);
+
+	/* Set R_PRCM bus clocks to non-secure */
+	writel(0x1, SUNXI_R_PRCM_SEC_SWITCH_REG);
+
+	/* Set all DMA channels (16 max.) to non-secure */
+	writel(0xffff, SUNXI_DMA_BASE + DMA_SEC_REG);
+}
+
 int spl_board_init_f(void)
 {
 	int ret;
@@ -195,6 +261,9 @@ int spl_board_init_f(void)
 		return ret;
 	}
 
+	sunxi_security_setup();
+
+#ifdef CONFIG_RISCV
 	/* Initialize extension CSRs. */
 	printf("mxstatus=0x%08lx mhcr=0x%08lx mcor=0x%08lx mhint=0x%08lx\n",
 	       csr_read(CSR_MXSTATUS),
@@ -206,11 +275,34 @@ int spl_board_init_f(void)
 	csr_write(CSR_MCOR, 0x70013);
 	csr_write(CSR_MHCR, 0x11ff);
 	csr_write(CSR_MHINT, 0x16e30c);
+#endif
 
 	return 0;
 }
 
-#ifdef CONFIG_SPL_BUILD
+#ifdef CONFIG_ARM
+void reset_cpu(void)
+{
+}
+
+void board_init_f(ulong dummy)
+{
+	int ret;
+
+	timer_init();
+
+	ret = spl_early_init();
+	if (ret)
+		panic("spl_early_init() failed: %d\n", ret);
+
+	preloader_console_init();
+
+	ret = spl_board_init_f();
+	if (ret)
+		panic("spl_board_init_f() failed: %d\n", ret);
+}
+#endif
+
 void spl_perform_fixups(struct spl_image_info *spl_image)
 {
 	struct ram_info info;
@@ -219,15 +311,19 @@ void spl_perform_fixups(struct spl_image_info *spl_image)
 
 	ret = uclass_get_device(UCLASS_RAM, 0, &dev);
 	if (ret)
-		panic("No RAM device");
+		panic("No RAM device\n");
 
 	ret = ram_get_info(dev, &info);
 	if (ret)
-		panic("No RAM info");
+		panic("No RAM info\n");
 
+	printf("FDT at %p\n", spl_image->fdt_addr);
+	ret = fdt_increase_size(spl_image->fdt_addr, 512);
+	if (ret)
+		printf("Failed to resize DTB\n");
 	ret = fdt_fixup_memory(spl_image->fdt_addr, info.base, info.size);
 	if (ret)
-		panic("Failed to update DTB");
+		printf("Failed to update DTB\n");
 }
 #endif
 #endif
@@ -551,7 +647,7 @@ int board_late_init(void)
 	usb_ether_init();
 #endif
 
-#ifdef SUNXI_SCP_BASE
+#ifdef CONFIG_ARMV7_SECURE_BASE
 	if (!rproc_load(0, SUNXI_SCP_BASE, SUNXI_SCP_MAX_SIZE)) {
 		puts("Starting SCP...\n");
 		rproc_start(0);

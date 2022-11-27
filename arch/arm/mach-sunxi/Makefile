@@ -6,6 +6,7 @@
 # (C) Copyright 2000-2003
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 
+ifndef CONFIG_MACH_SUN8I_T113
 obj-y	+= board.o
 obj-y	+= clock.o
 obj-y	+= cpu_info.o
@@ -45,4 +46,7 @@ obj-$(CONFIG_DRAM_SUN50I_H6)	+= dram_sun50i_h6.o
 obj-$(CONFIG_DRAM_SUN50I_H6)	+= dram_timings/
 obj-$(CONFIG_DRAM_SUN50I_H616)	+= dram_sun50i_h616.o
 obj-$(CONFIG_DRAM_SUN50I_H616)	+= dram_timings/
+endif
+else
+obj-y	+= dummy.o
 endif

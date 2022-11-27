@@ -268,6 +268,14 @@ config MACH_SUN8I_R40
 	select SUNXI_DRAM_DW_32BIT
 	imply SPL_SYS_I2C_LEGACY
 
+config MACH_SUN8I_T113
+	bool "sun8i (Allwinner T113)"
+	select CPU_V7A
+	select CPU_V7_HAS_NONSEC
+	select CPU_V7_HAS_VIRT
+	select ARCH_SUPPORT_PSCI
+	select SUN50I_GEN_H6
+
 config MACH_SUN8I_V3S
 	bool "sun8i (Allwinner V3/V3s/S3/S3L)"
 	select CPU_V7A
@@ -333,6 +341,7 @@ config MACH_SUN8I
 	default y if MACH_SUN8I_A83T
 	default y if MACH_SUNXI_H3_H5
 	default y if MACH_SUN8I_R40
+	default y if MACH_SUN8I_T113
 	default y if MACH_SUN8I_V3S
 
 config RESERVE_ALLWINNER_BOOT0_HEADER

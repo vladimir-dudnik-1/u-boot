@@ -135,6 +135,12 @@ static void __secure sunxi_set_entry_address(void *entry)
 	writel((u32)entry,
 	       SUNXI_SRAMC_BASE + SUN8I_R40_SRAMC_SOFT_ENTRY_REG0);
 }
+#elif defined CONFIG_MACH_SUN8I_T113
+static void __secure sunxi_set_entry_address(void *entry)
+{
+	writel((u32)entry, 0x070005C4);
+	writel((u32)entry, 0x070005C8);
+}
 #else
 static void __secure sunxi_set_entry_address(void *entry)
 {
@@ -172,6 +178,10 @@ static void __secure sunxi_cpu_set_power(int cpu, bool on)
 			   (void *)cpucfg + SUN8I_R40_PWROFF,
 			   on, cpu);
 }
+#elif defined CONFIG_MACH_SUN8I_T113
+static void __secure sunxi_cpu_set_power(int cpu, bool on)
+{
+}
 #else /* ! CONFIG_MACH_SUN7I && ! CONFIG_MACH_SUN8I_R40 */
 static void __secure sunxi_cpu_set_power(int cpu, bool on)
 {
@@ -185,11 +195,19 @@ static void __secure sunxi_cpu_set_power(int cpu, bool on)
 
 void __secure sunxi_cpu_power_off(u32 cpuid)
 {
+#ifndef CONFIG_MACH_SUN8I_T113
 	struct sunxi_cpucfg_reg *cpucfg =
 		(struct sunxi_cpucfg_reg *)SUNXI_CPUCFG_BASE;
+#endif
 	u32 cpu = cpuid & 0x3;
 
 	/* Wait for the core to enter WFI */
+#ifdef CONFIG_MACH_SUN8I_T113
+	while (!(readl(0x9010000 + 0x80) & BIT(16 + cpu)))
+		__mdelay(1);
+
+	clrbits_le32(0x9010000, BIT(cpu));
+#else
 	while (1) {
 		if (readl(&cpucfg->cpu[cpu].status) & BIT(2))
 			break;
@@ -207,6 +225,7 @@ void __secure sunxi_cpu_power_off(u32 cpuid)
 
 	/* Unlock CPU (Disable external debug access) */
 	setbits_le32(&cpucfg->dbg_ctrl1, BIT(cpu));
+#endif
 }
 
 static u32 __secure cp15_read_scr(void)
@@ -264,8 +283,10 @@ int __secure psci_cpu_on(u32 __always_unused unused, u32 mpidr, u32 pc,
 			 u32 context_id)
 {
 	struct sunxi_ccm_reg *ccu = (struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
+#ifndef CONFIG_MACH_SUN8I_T113
 	struct sunxi_cpucfg_reg *cpucfg =
 		(struct sunxi_cpucfg_reg *)SUNXI_CPUCFG_BASE;
+#endif
 	u32 cpu = (mpidr & 0x3);
 	u32 cpu_clk;
 	u32 bus_clk;
@@ -276,6 +297,9 @@ int __secure psci_cpu_on(u32 __always_unused unused, u32 mpidr, u32 pc,
 	/* Set secondary core power on PC */
 	sunxi_set_entry_address(&psci_cpu_entry);
 
+#ifdef CONFIG_MACH_SUN8I_T113
+	setbits_le32(0x9010000, BIT(cpu));
+#else
 	/* Assert reset on target CPU */
 	writel(0, &cpucfg->cpu[cpu].rst);
 
@@ -313,6 +337,7 @@ int __secure psci_cpu_on(u32 __always_unused unused, u32 mpidr, u32 pc,
 
 	/* Unlock CPU (Disable external debug access) */
 	setbits_le32(&cpucfg->dbg_ctrl1, BIT(cpu));
+#endif
 
 	return ARM_PSCI_RET_SUCCESS;
 }

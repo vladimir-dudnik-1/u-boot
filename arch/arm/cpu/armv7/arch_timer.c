@@ -34,6 +34,10 @@ int timer_init(void)
 #else
 	gd->arch.timer_rate_hz = read_cntfrq();
 #endif
+	printf("cntfreq = %ld\n", gd->arch.timer_rate_hz);
+	if (!gd->arch.timer_rate_hz)
+		gd->arch.timer_rate_hz = 24000000;
+
 	return 0;
 }
 
