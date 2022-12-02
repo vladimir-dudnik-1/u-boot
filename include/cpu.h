@@ -19,7 +19,7 @@ struct udevice;
  * @timebase_freq: the current frequency at which the cpu timer timebase
  *		   registers are updated (in Hz)
  *
- * This can be accessed with dev_get_parent_plat() for any UCLASS_CPU
+ * This can be accessed with dev_get_uclass_plat() for any UCLASS_CPU
  * device.
  */
 struct cpu_plat {

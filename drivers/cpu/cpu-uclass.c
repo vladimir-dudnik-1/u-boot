@@ -108,7 +108,6 @@ int cpu_get_vendor(const struct udevice *dev, char *buf, int size)
 U_BOOT_DRIVER(cpu_bus) = {
 	.name	= "cpu_bus",
 	.id	= UCLASS_SIMPLE_BUS,
-	.per_child_plat_auto	= sizeof(struct cpu_plat),
 };
 
 static int uclass_cpu_init(struct uclass *uc)
@@ -159,4 +158,5 @@ UCLASS_DRIVER(cpu) = {
 	.flags		= DM_UC_FLAG_SEQ_ALIAS,
 	.init		= uclass_cpu_init,
 	.post_bind	= uclass_cpu_post_bind,
+	.per_device_plat_auto	= sizeof(struct cpu_plat),
 };

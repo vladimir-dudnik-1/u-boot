@@ -14,7 +14,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int cpu_x86_bind(struct udevice *dev)
 {
-	struct cpu_plat *plat = dev_get_parent_plat(dev);
+	struct cpu_plat *plat = dev_get_uclass_plat(dev);
 	struct cpuid_result res;
 
 	plat->cpu_id = fdtdec_get_int(gd->fdt_blob, dev_of_offset(dev),

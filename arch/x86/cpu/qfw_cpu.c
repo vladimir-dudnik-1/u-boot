@@ -80,7 +80,7 @@ int qemu_cpu_fixup(void)
 			printf("binding cpu@%d failed: %d\n", cpu_num, ret);
 			return ret;
 		}
-		plat = dev_get_parent_plat(dev);
+		plat = dev_get_uclass_plat(dev);
 		plat->cpu_id = cpu_num;
 	}
 	return 0;
