@@ -469,21 +469,16 @@ void clk_free(struct clk *clk)
 ulong clk_get_rate(struct clk *clk)
 {
 	const struct clk_ops *ops;
-	int ret;
 
 	debug("%s(clk=%p)\n", __func__, clk);
 	if (!clk_valid(clk))
 		return 0;
-	ops = clk_dev_ops(clk->dev);
 
+	ops = clk_dev_ops(clk->dev);
 	if (!ops->get_rate)
 		return -ENOSYS;
 
-	ret = ops->get_rate(clk);
-	if (ret)
-		return log_ret(ret);
-
-	return 0;
+	return ops->get_rate(clk);
 }
 
 struct clk *clk_get_parent(struct clk *clk)
