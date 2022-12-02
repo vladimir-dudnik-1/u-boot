@@ -31,6 +31,20 @@ u32 available_harts_lock = 1;
 #endif
 #endif
 
+int dm_scan_other(bool pre_reloc_only)
+{
+#ifdef CONFIG_CPU
+	int ret;
+
+	/* probe cpus so that RISC-V timer can be bound */
+	ret = cpu_probe_all();
+	if (ret)
+		return log_msg_ret("RISC-V cpus probe failed\n", ret);
+#endif
+
+	return 0;
+}
+
 static inline bool supports_extension(char ext)
 {
 #ifdef CONFIG_CPU
@@ -68,20 +82,6 @@ static inline bool supports_extension(char ext)
 #endif /* CONFIG_CPU */
 }
 
-static int riscv_cpu_probe(void)
-{
-#ifdef CONFIG_CPU
-	int ret;
-
-	/* probe cpus so that RISC-V timer can be bound */
-	ret = cpu_probe_all();
-	if (ret)
-		return log_msg_ret("RISC-V cpus probe failed\n", ret);
-#endif
-
-	return 0;
-}
-
 /*
  * This is called on secondary harts just after the IPI is init'd. Currently
  * there's nothing to do, since we just need to clear any existing IPIs, and
@@ -95,11 +95,7 @@ static void dummy_pending_ipi_clear(ulong hart, ulong arg0, ulong arg1)
 
 int riscv_cpu_setup(void *ctx, struct event *event)
 {
-	int ret;
-
-	ret = riscv_cpu_probe();
-	if (ret)
-		return ret;
+	int ret __maybe_unused;
 
 	/* Enable FPU */
 	if (supports_extension('d') || supports_extension('f')) {
@@ -149,12 +145,6 @@ EVENT_SPY(EVT_DM_POST_INIT, riscv_cpu_setup);
 
 int arch_early_init_r(void)
 {
-	int ret;
-
-	ret = riscv_cpu_probe();
-	if (ret)
-		return ret;
-
 	if (IS_ENABLED(CONFIG_SYSRESET_SBI))
 		device_bind_driver(gd->dm_root, "sbi-sysreset",
 				   "sbi-sysreset", NULL);
