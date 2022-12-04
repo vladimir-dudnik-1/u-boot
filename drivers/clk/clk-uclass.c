@@ -502,7 +502,6 @@ struct clk *clk_get_parent(struct clk *clk)
 
 ulong clk_get_parent_rate(struct clk *clk)
 {
-	const struct clk_ops *ops;
 	struct clk *pclk;
 
 	debug("%s(clk=%p)\n", __func__, clk);
@@ -513,12 +512,9 @@ ulong clk_get_parent_rate(struct clk *clk)
 	if (IS_ERR(pclk))
 		return -ENODEV;
 
-	ops = clk_dev_ops(pclk->dev);
-	if (!ops->get_rate)
-		return -ENOSYS;
-
 	/* Read the 'rate' if not already set or if proper flag set*/
-	if (!pclk->rate || pclk->flags & CLK_GET_RATE_NOCACHE)
+	if (!pclk->rate || IS_ERR_VALUE(pclk->rate) ||
+	    pclk->flags & CLK_GET_RATE_NOCACHE)
 		pclk->rate = clk_get_rate(pclk);
 
 	return pclk->rate;
