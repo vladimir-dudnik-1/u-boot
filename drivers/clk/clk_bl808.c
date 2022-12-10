@@ -14,6 +14,7 @@
 #include <dt-bindings/clock/bl808-hbn.h>
 #include <dt-bindings/clock/bl808-mm-glb.h>
 #include <dt-bindings/clock/bl808-pds.h>
+#include <dt-bindings/reset/bl808-mm-glb.h>
 
 #define PRNTS(...) (const u8[]) { __VA_ARGS__ }
 
@@ -388,9 +389,16 @@ static const struct bl808_clk_data bl808_mm_glb_clks[] = {
 	},
 };
 
+static const struct bl808_reset_data bl808_mm_glb_resets[] = {
+	[RST_MM_CPU]	= { MM_GLB_MM_SW_SYS_RESET_OFFSET,
+			    MM_GLB_REG_CTRL_MMCPU0_RESET_POS },
+};
+
 static const struct bl808_clk_desc bl808_mm_glb_clk_desc = {
 	.clks		= bl808_mm_glb_clks,
+	.resets		= bl808_mm_glb_resets,
 	.num_clks	= ARRAY_SIZE(bl808_mm_glb_clks),
+	.num_resets	= ARRAY_SIZE(bl808_mm_glb_resets),
 };
 
 static const struct bl808_clk_data bl808_pds_clks[] = {
@@ -738,6 +746,18 @@ struct clk_ops bl808_clk_ops = {
 	.dump		= bl808_clk_dump,
 };
 
+extern U_BOOT_DRIVER(bl808_reset);
+
+static int bl808_clk_bind(struct udevice *dev)
+{
+	if (IS_ENABLED(CONFIG_RESET_BL808)) {
+		device_bind(dev, DM_DRIVER_REF(bl808_reset), "reset",
+			    dev_get_plat(dev), dev_ofnode(dev), NULL);
+	}
+
+	return 0;
+}
+
 static int bl808_clk_probe(struct udevice *dev)
 {
 	const struct bl808_clk_plat *plat = dev_get_plat(dev);
@@ -771,6 +791,7 @@ U_BOOT_DRIVER(bl808_clk) = {
 	.name		= "bl808_clk",
 	.id		= UCLASS_CLK,
 	.of_match	= bl808_clk_ids,
+	.bind		= bl808_clk_bind,
 	.probe		= bl808_clk_probe,
 	.of_to_plat	= bl808_clk_of_to_plat,
 	.plat_auto	= sizeof(struct bl808_clk_plat),

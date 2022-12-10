@@ -63,6 +63,12 @@ config RESET_BCM6345
 	help
 	  Support reset controller on BCM6345.
 
+config RESET_BL808
+	bool "Reset controller driver for BL808"
+	depends on DM_RESET && TARGET_BOUFFALO_BL808
+	help
+	  This enables reset controller support for the Bouffalo Lab BL808 SoC.
+
 config RESET_UNIPHIER
 	bool "Reset controller driver for UniPhier SoCs"
 	depends on ARCH_UNIPHIER

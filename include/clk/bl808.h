@@ -16,9 +16,16 @@ struct bl808_clk_data {
 	u16 		fixed_div;
 };
 
+struct bl808_reset_data {
+	u16	reg;
+	u8	bit;
+};
+
 struct bl808_clk_desc {
 	const struct bl808_clk_data	*clks;
+	const struct bl808_reset_data	*resets;
 	u8				num_clks;
+	u8				num_resets;
 };
 
 struct bl808_clk_plat {
