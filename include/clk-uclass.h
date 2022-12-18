@@ -41,6 +41,7 @@ struct clk_ops {
 	int (*set_parent)(struct clk *clk, struct clk *parent);
 	int (*enable)(struct clk *clk);
 	int (*disable)(struct clk *clk);
+	void (*dump)(struct udevice *dev);
 };
 
 #if 0 /* For documentation only */

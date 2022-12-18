@@ -678,6 +678,54 @@ static int bl808_clk_disable(struct clk *clk)
 	return bl808_clk_set_gate(clk, false);
 }
 
+static void bl808_clk_dump(struct udevice *dev)
+{
+	const struct bl808_clk_plat *plat = dev_get_plat(dev);
+	const struct bl808_clk_desc *desc = plat->desc;
+	struct clk clk, *parent;
+
+	printf("   %s (%s)\n", dev->name, dev_read_string(dev, "compatible"));
+	printf("ID       NAME            PARENT         RATE    SEL DIV EN\n");
+	printf("--+----------------+----------------+----------+---+---+--\n");
+
+	clk.dev = dev;
+	for (size_t id = 0; id < desc->num_clks; ++id) {
+		const struct bl808_clk_data *data = &desc->clks[id];
+		const char *parent_name;
+
+		clk.id = id;
+		parent = clk_get_parent(&clk);
+
+		if (IS_ERR(parent))
+			parent_name = "(none)";
+		else if (parent->dev->driver != dev->driver)
+			parent_name = parent->dev->name;
+		else {
+			const struct bl808_clk_plat *pplat = dev_get_plat(parent->dev);
+			const struct bl808_clk_data *pdata = bl808_clk_get_data(pplat, parent);
+
+			parent_name = pdata->name;
+			if (!parent_name)
+				parent_name = "(null)";
+		}
+
+		printf("%2zd %16s %16s %10ld",
+		       id, data->name, parent_name, clk_get_rate(&clk));
+		if (data->sel_mask)
+			printf(" %3d", (readl(plat->base + data->sel_reg) & data->sel_mask) / (data->sel_mask & -data->sel_mask));
+		else if (data->div_mask || data->en_mask)
+			puts("    ");
+		if (data->div_mask)
+			printf(" %3d", (readl(plat->base + data->div_reg) & data->div_mask) / (data->div_mask & -data->div_mask));
+		else if (data->en_mask)
+			puts("    ");
+		if (data->en_mask)
+			printf(" %2d", (readl(plat->base + data->en_reg) & data->en_mask) / (data->en_mask & -data->en_mask));
+		puts("\n");
+	}
+	puts("\n");
+}
+
 struct clk_ops bl808_clk_ops = {
 	.request	= bl808_clk_request,
 	.round_rate	= bl808_clk_round_rate,
@@ -687,6 +735,7 @@ struct clk_ops bl808_clk_ops = {
 	.set_parent	= bl808_clk_set_parent,
 	.enable		= bl808_clk_enable,
 	.disable	= bl808_clk_disable,
+	.dump		= bl808_clk_dump,
 };
 
 static int bl808_clk_probe(struct udevice *dev)
