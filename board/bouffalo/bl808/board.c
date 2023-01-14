@@ -2,9 +2,11 @@
 
 #include <asm/io.h>
 #include <bl808/glb_reg.h>
+#include <bl808/mm_misc_reg.h>
 #include <linux/bitops.h>
 
 #define GLB_BASE			(void *)0x20000000
+#define MM_MISC_BASE			(void *)0x30000000
 
 void board_debug_uart_init(void)
 {
@@ -30,6 +32,15 @@ void board_debug_uart_init(void)
 int board_early_init_f(void)
 {
 	board_debug_uart_init();
+
+	u32 val = MM_MISC_REG_H2PF_SRAM_REL_MSK |
+		  MM_MISC_REG_VRAM_SRAM_REL_MSK |
+		  MM_MISC_REG_SUB_SRAM_REL_MSK |
+		  MM_MISC_REG_BLAI_SRAM_REL_MSK;
+	writel(val, MM_MISC_BASE + MM_MISC_VRAM_CTRL_OFFSET);
+
+	val |= MM_MISC_REG_SYSRAM_SET_MSK;
+	writel(val, MM_MISC_BASE + MM_MISC_VRAM_CTRL_OFFSET);
 
 	return 0;
 }
