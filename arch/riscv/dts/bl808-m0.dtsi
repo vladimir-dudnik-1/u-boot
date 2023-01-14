@@ -29,6 +29,11 @@
 		};
 	};
 
+	memory {
+		device_type = "memory";
+		reg = <0x7ef80000 0x80000>;
+	};
+
 	clint: timer@e0000000 {
 		compatible = "thead,e907-clint",
 			     "sifive,clint0";
