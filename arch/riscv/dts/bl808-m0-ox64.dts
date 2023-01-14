@@ -23,7 +23,7 @@
 
 &gpio {
 	uart0_pins: uart0-pins {
-		pins = "GPIO12", "GPIO13";
+		pins = "GPIO14", "GPIO15";
 		function = "uart";
 	};
 };
@@ -31,4 +31,5 @@
 &uart0 {
 	pinctrl-0 = <&uart0_pins>;
 	pinctrl-names = "default";
+	status = "okay";
 };

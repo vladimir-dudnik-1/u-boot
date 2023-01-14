@@ -84,12 +84,14 @@
 			compatible = "bflb,bl808-uart";
 			reg = <0x2000a000 0x100>;
 			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
 		};
 
 		uart1: serial@2000a100 {
 			compatible = "bflb,bl808-uart";
 			reg = <0x2000a100 0x100>;
 			clocks = <&glb_clk CLK_UART>;
+			status = "disabled";
 		};
 
 		spi0: spi@2000a200 {

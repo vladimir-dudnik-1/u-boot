@@ -13,14 +13,27 @@ config SYS_VENDOR
 	default "bouffalo"
 
 config TEXT_BASE
-	default 0x22020000
+	default 0x22020000 if BL808_CPU_M0
+	default 0x50100000 if BL808_CPU_D0
 
 config BOARD_SPECIFIC_OPTIONS # dummy
 	def_bool y
 	select BOARD_EARLY_INIT_F
 	select DM_GPIO if GPIO
 	select GENERIC_RISCV
+	select OF_HAS_PRIOR_STAGE if RISCV_SMODE
 	imply BFLB_SERIAL
 	imply RISCV_TIMER
+
+choice
+	prompt "CPU selection"
+
+config BL808_CPU_M0
+	bool "Run from SRAM on M0"
+
+config BL808_CPU_D0
+	bool "Run from PSRAM on D0"
+
+endchoice
 
 endif

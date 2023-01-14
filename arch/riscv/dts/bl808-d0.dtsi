@@ -30,6 +30,11 @@
 		};
 	};
 
+	memory {
+		device_type = "memory";
+		reg = <0x50000000 0x4000000>;
+	};
+
 	plic: interrupt-controller@e0000000 {
 		compatible = "thead,c900-plic";
 		reg = <0xe0000000 0x4000000>;
