@@ -3,10 +3,14 @@
 #include <dm.h>
 #include <errno.h>
 #include <bl808/glb_reg.h>
+#include <asm/gpio.h>
 #include <asm/io.h>
+#include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dm/pinctrl.h>
 #include <linux/bitfield.h>
+
+#define BFLB_FUNC_GPIO	11
 
 struct bflb_pinctrl_desc {
 	const char *const	*functions;
@@ -57,6 +61,93 @@ static const struct udevice_id bflb_pinctrl_ids[] = {
 struct bflb_pinctrl_plat {
 	void __iomem			*base;
 	const struct bflb_pinctrl_desc	*desc;
+};
+
+static int bflb_gpio_get_value(struct udevice *dev, unsigned offset)
+{
+	struct bflb_pinctrl_plat *plat = dev_get_plat(dev);
+	u32 val;
+
+	val = readl(plat->base + GLB_GPIO_CFG0_OFFSET + 4 * offset);
+
+	return FIELD_GET(GLB_REG_GPIO_0_I_MSK, val);
+}
+
+static int bflb_gpio_get_function(struct udevice *dev, unsigned offset)
+{
+	struct bflb_pinctrl_plat *plat = dev_get_plat(dev);
+	u32 val;
+
+	val = readl(plat->base + GLB_GPIO_CFG0_OFFSET + 4 * offset);
+
+	if (!FIELD_GET(GLB_REG_GPIO_0_IE_MSK, val) &&
+	    !FIELD_GET(GLB_REG_GPIO_0_OE_MSK, val))
+		return GPIOF_UNUSED;
+
+	if (FIELD_GET(GLB_REG_GPIO_0_FUNC_SEL_MSK, val) != BFLB_FUNC_GPIO)
+		return GPIOF_FUNC;
+	else if (FIELD_GET(GLB_REG_GPIO_0_OE_MSK, val))
+		return GPIOF_OUTPUT;
+	else
+		return GPIOF_INPUT;
+}
+
+static int bflb_gpio_set_flags(struct udevice *dev, unsigned int offset,
+			       ulong flags)
+{
+	struct bflb_pinctrl_plat *plat = dev_get_plat(dev);
+	u32 val;
+
+	val = readl(plat->base + GLB_GPIO_CFG0_OFFSET + 4 * offset);
+	val &= ~(GLB_REG_GPIO_0_IE_MSK |
+		 GLB_REG_GPIO_0_PU_MSK |
+		 GLB_REG_GPIO_0_PD_MSK |
+		 GLB_REG_GPIO_0_OE_MSK |
+		 GLB_REG_GPIO_0_FUNC_SEL_MSK |
+		 GLB_REG_GPIO_0_O_MSK);
+	val |= FIELD_PREP(GLB_REG_GPIO_0_FUNC_SEL_MSK, BFLB_FUNC_GPIO);
+
+	if (flags & GPIOD_IS_OUT) {
+		val |= GLB_REG_GPIO_0_OE_MSK;
+
+		if (flags & GPIOD_IS_OUT_ACTIVE)
+			val |= GLB_REG_GPIO_0_O_MSK;
+	} else if (flags & GPIOD_IS_IN) {
+		val |= GLB_REG_GPIO_0_IE_MSK;
+
+		if (flags & GPIOD_PULL_UP)
+			val |= GLB_REG_GPIO_0_PU_MSK;
+		else if (flags & GPIOD_PULL_DOWN)
+			val |= GLB_REG_GPIO_0_PD_MSK;
+	}
+
+	writel(val, plat->base + GLB_GPIO_CFG0_OFFSET + 4 * offset);
+
+	return 0;
+}
+
+static const struct dm_gpio_ops bflb_gpio_ops = {
+	.get_value		= bflb_gpio_get_value,
+	.get_function		= bflb_gpio_get_function,
+	.set_flags		= bflb_gpio_set_flags,
+};
+
+static int bflb_gpio_probe(struct udevice *dev)
+{
+	struct bflb_pinctrl_plat *plat = dev_get_plat(dev);
+	struct gpio_dev_priv *uc_priv = dev_get_uclass_priv(dev);
+
+	uc_priv->gpio_count = plat->desc->num_pins;
+	uc_priv->bank_name = "GPIO";
+
+	return 0;
+}
+
+U_BOOT_DRIVER(bflb_gpio) = {
+	.name		= "bflb_gpio",
+	.id		= UCLASS_GPIO,
+	.probe		= bflb_gpio_probe,
+	.ops		= &bflb_gpio_ops,
 };
 
 static int bflb_pinctrl_get_pins_count(struct udevice *dev)
@@ -201,6 +292,14 @@ static const struct pinctrl_ops bflb_pinctrl_ops = {
 	.get_pin_muxing		= bflb_pinctrl_get_pin_muxing,
 };
 
+static int bflb_pinctrl_bind(struct udevice *dev)
+{
+	device_bind(dev, DM_DRIVER_REF(bflb_gpio), "gpio",
+		    dev_get_plat(dev), dev_ofnode(dev), NULL);
+
+	return 0;
+}
+
 static int bflb_pinctrl_of_to_plat(struct udevice *dev)
 {
 	struct bflb_pinctrl_plat *plat = dev_get_plat(dev);
@@ -220,6 +319,7 @@ U_BOOT_DRIVER(bflb_pinctrl) = {
 	.name		= "bflb_pinctrl",
 	.id		= UCLASS_PINCTRL,
 	.of_match	= bflb_pinctrl_ids,
+	.bind		= bflb_pinctrl_bind,
 	.of_to_plat	= bflb_pinctrl_of_to_plat,
 	.plat_auto	= sizeof(struct bflb_pinctrl_plat),
 	.ops		= &bflb_pinctrl_ops,
