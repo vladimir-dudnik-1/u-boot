@@ -4,15 +4,27 @@
  * Rick Chen, Andes Technology Corporation <rick@andestech.com>
  */
 
+#include <config.h>
+
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
+
+#ifdef CONFIG_XIP
+MEMORY { .xip : ORIGIN = CONFIG_TEXT_BASE, LENGTH = CONFIG_SYS_MONITOR_LEN }
+MEMORY { .ram : ORIGIN = CFG_SYS_INIT_RAM_ADDR, LENGTH = CFG_SYS_INIT_RAM_SIZE }
+#define TO_XIP >.xip
+#define TO_RAM >.ram AT>.xip
+#else
+#define TO_XIP
+#define TO_RAM
+#endif
 
 SECTIONS
 {
 	. = ALIGN(4);
 	.text : {
 		arch/riscv/cpu/start.o	(.text)
-	}
+	} TO_XIP
 
 	/* This needs to come before *(.text*) */
 	.efi_runtime : {
@@ -21,32 +33,36 @@ SECTIONS
 		*(.rodata.efi_runtime*)
 		*(.data.efi_runtime*)
 		__efi_runtime_stop = .;
-	}
+	} TO_XIP
 
 	.text_rest : {
 		*(.text*)
-	}
+	} TO_XIP
 
 	. = ALIGN(4);
-	.rodata : { *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*))) }
+	.rodata : { *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.rodata*))) } TO_XIP
 
-	. = ALIGN(4);
-	.data : {
-		*(.data*)
-	}
 	. = ALIGN(4);
 
 	.got : {
 		__got_start = .;
 		*(.got.plt) *(.got)
 		__got_end = .;
-	}
+	} TO_XIP
+
+	. = ALIGN(4);
+
+	.data : {
+		__data_start = .;
+		*(.data*)
+	} TO_RAM
+	__data_load_start = LOADADDR(.data);
 
 	. = ALIGN(4);
 
 	__u_boot_list : {
 		KEEP(*(SORT(__u_boot_list*)));
-	}
+	} TO_RAM
 
 	. = ALIGN(4);
 
@@ -55,7 +71,7 @@ SECTIONS
 		*(.rel*.efi_runtime)
 		*(.rel*.efi_runtime.*)
 		__efi_runtime_rel_stop = .;
-	}
+	} TO_RAM
 
 	. = ALIGN(4);
 
@@ -64,7 +80,7 @@ SECTIONS
 		__rel_dyn_start = .;
 		*(.rela*)
 		__rel_dyn_end = .;
-	}
+	} TO_RAM
 
 	. = ALIGN(4);
 
@@ -72,7 +88,7 @@ SECTIONS
 		__dyn_sym_start = .;
 		*(.dynsym)
 		__dyn_sym_end = .;
-	}
+	} TO_RAM
 
 	. = ALIGN(4);
 
@@ -83,5 +99,5 @@ SECTIONS
 		*(.bss*)
 		. = ALIGN(8);
 		__bss_end = .;
-	}
+	} TO_RAM
 }

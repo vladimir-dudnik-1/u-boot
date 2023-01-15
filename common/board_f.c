@@ -733,8 +733,6 @@ static int fix_fdt(void)
 
 static int jump_to_copy(void)
 {
-	if (gd->flags & GD_FLG_SKIP_RELOC)
-		return 0;
 	/*
 	 * x86 is special, but in a nice way. It uses a trampoline which
 	 * enables the dcache if possible.
@@ -744,6 +742,8 @@ static int jump_to_copy(void)
 	 * we can make all archs enable the dcache prior to relocation.
 	 */
 #if defined(CONFIG_X86) || defined(CONFIG_ARC)
+	if (gd->flags & GD_FLG_SKIP_RELOC)
+		return 0;
 	/*
 	 * SDRAM and console are now initialised. The final stack can now
 	 * be setup in SDRAM. Code execution will continue in Flash, but

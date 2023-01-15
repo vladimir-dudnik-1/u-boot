@@ -99,6 +99,15 @@ call_board_init_f:
 #endif
 	and	sp, t1, t0		/* force 16 byte alignment */
 
+#if CONFIG_IS_ENABLED(XIP)
+	/* Copy XIP data to RAM. */
+	la	a0, __data_start
+	la	a1, __data_load_start
+	la	a2, _end
+	sub	a2, a2, a0
+	jal	memcpy
+#endif
+
 call_board_init_f_0:
 	mv	a0, sp
 	jal	board_init_f_alloc_reserve
@@ -196,7 +205,11 @@ wait_for_gd_init:
 	jal	debug_uart_init
 #endif
 
+#if CONFIG_IS_ENABLED(XIP)
+	li	a0, 0x800		/* GD_FLG_SKIP_RELOC */
+#else
 	mv	a0, zero		/* a0 <-- boot_flags = 0 */
+#endif
 	la	t5, board_init_f
 	jalr	t5			/* jump to board_init_f() */
 
@@ -278,6 +291,9 @@ stack_setup:
 	mv	sp, s2
 #endif
 
+#if CONFIG_IS_ENABLED(XIP)
+	mv	t6, zero
+#else
 	la	t0, _start
 	sub	t6, s4, t0		/* t6 <- relocation offset */
 	beq	t0, s4, clear_bss	/* skip relocation */
@@ -351,6 +367,7 @@ fix_rela_dyn:
 	la	t0, trap_entry
 	add	t0, t0, t6
 	csrw	MODE_PREFIX(tvec), t0
+#endif
 
 clear_bss:
 	la	t0, __bss_start		/* t0 <- rel __bss_start in FLASH */
