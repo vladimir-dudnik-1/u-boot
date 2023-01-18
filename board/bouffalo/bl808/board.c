@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: GPL-2.0+
 
 #include <dm.h>
+#include <asm/csr.h>
 #include <asm/io.h>
 #include <bl808/glb_reg.h>
 #include <bl808/mm_misc_reg.h>
 #include <linux/bitops.h>
+
+#define CSR_MXSTATUS			0x7c0
+#define CSR_MHCR			0x7c1
+#define CSR_MCOR			0x7c2
+#define CSR_MHINT			0x7c5
 
 #define GLB_BASE			(void *)0x20000000
 #define MM_MISC_BASE			(void *)0x30000000
@@ -77,6 +83,17 @@ int board_init(void)
 		printf("DRAM init failed: %d\n", ret);
 		return ret;
 	}
+#endif
+
+	return 0;
+}
+
+int mach_cpu_init(void)
+{
+	/* Initialize extension CSRs. */
+#ifdef CONFIG_BL808_CPU_M0
+	csr_set(CSR_MXSTATUS, 0x8000);
+	csr_write(CSR_MHCR, 0x103f);
 #endif
 
 	return 0;
