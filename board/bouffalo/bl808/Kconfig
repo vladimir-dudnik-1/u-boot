@@ -13,6 +13,7 @@ config SYS_VENDOR
 	default "bouffalo"
 
 config TEXT_BASE
+	default 0x58000000 if XIP
 	default 0x22020000 if BL808_CPU_M0
 	default 0x50100000 if BL808_CPU_D0
 
