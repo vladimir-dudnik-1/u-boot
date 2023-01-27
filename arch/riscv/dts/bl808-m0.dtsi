@@ -1,0 +1,54 @@
+// SPDX-License-Identifier: GPL-2.0+
+
+#include "bl808.dtsi"
+
+/ {
+	cpus {
+		timebase-frequency = <1000000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "thead,e907", "riscv";
+			device_type = "cpu";
+			reg = <0>;
+			d-cache-block-size = <64>;
+			d-cache-sets = <256>;
+			d-cache-size = <32768>;
+			i-cache-block-size = <64>;
+			i-cache-sets = <128>;
+			i-cache-size = <16384>;
+			riscv,isa = "rv32imafdc";
+
+			cpu0_intc: interrupt-controller {
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+			};
+		};
+	};
+
+	clint: timer@e0000000 {
+		compatible = "thead,e907-clint",
+			     "sifive,clint0";
+		reg = <0xe0000000 0xc000>;
+		interrupts-extended = <&cpu0_intc 3>,
+				      <&cpu0_intc 7>;
+	};
+
+	clic: interrupt-controller@e0800000 {
+		compatible = "thead,e907-clic";
+		reg = <0xe0800000 0x5000>;
+		interrupts-extended = <&cpu0_intc 11>,
+				      <&cpu0_intc 9>;
+		interrupt-controller;
+		riscv,ndev = <79>;
+		#address-cells = <0>;
+		#interrupt-cells = <2>;
+	};
+};
+
+&mcu_peri {
+	interrupt-parent = <&clic>;
+};
